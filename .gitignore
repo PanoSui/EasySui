@@ -1,0 +1,16 @@
+.idea
+.history
+.DS_Store
+.vscode
+.vercel
+node_modules
+build
+*.lock
+
+.env*
+!.env.example
+!.env.devnet
+!.env.testnet
+!.env.mainnet
+
+gas_cost_estimation.csv
