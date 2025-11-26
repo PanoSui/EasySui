@@ -5,6 +5,7 @@
 .vercel
 node_modules
 build
+dist
 *.lock
 
 .env*

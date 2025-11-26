@@ -1,23 +1,67 @@
 {
-  "name": "EasySui",
+  "name": "@easysui/sdk",
   "version": "0.0.1",
-  "private": true,
-  "scripts": {
-    "lint": "npx prettier -c **/*.ts",
-    "fix": "npx prettier -c **/*.ts --write",
-    "clean": "rm -rf ./node_modules"
+  "description": "Easy-to-use TypeScript SDK for Sui blockchain development",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "npx prettier -c **/*.ts",
+    "fix": "npx prettier -w **/*.ts",
+    "clean": "rm -rf ./node_modules ./dist",
+    "prepublishOnly": "pnpm build",
+    "test": "jest",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "pnpm build && changeset publish"
+  },
+  "keywords": [
+    "sui",
+    "blockchain",
+    "sdk",
+    "typescript",
+    "web3",
+    "mysten"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/panosui/easysui.git"
+  },
+  "bugs": {
+    "url": "https://github.com/panosui/easysui/issues"
+  },
+  "homepage": "https://github.com/panosui/easysui#readme",
   "devDependencies": {
+    "@changesets/cli": "^2.27.1",
     "@types/jest": "^30.0.0",
     "jest": "^30.1.3",
     "prettier": "^3.6.2",
-    "ts-jest": "^29.4.1"
+    "ts-jest": "^29.4.1",
+    "tsup": "^8.0.1",
+    "typescript": "^5.9.2"
   },
   "dependencies": {
     "@mysten/sui": "^1.38.0",
     "@types/node": "^24.3.1",
-    "dotenv": "^17.2.2",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.2"
+    "dotenv": "^17.2.2"
+  },
+  "peerDependencies": {
+    "@mysten/sui": "^1.38.0"
   }
 }
