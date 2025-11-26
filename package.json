@@ -23,6 +23,7 @@
     "lint": "npx prettier -c **/*.ts",
     "fix": "npx prettier -w **/*.ts",
     "clean": "rm -rf ./node_modules ./dist",
+    "prepare": "pnpm build",
     "prepublishOnly": "pnpm build",
     "test": "jest",
     "changeset": "changeset",
