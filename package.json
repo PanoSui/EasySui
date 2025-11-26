@@ -1,6 +1,6 @@
 {
   "name": "@easysui/sdk",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Easy-to-use TypeScript SDK for Sui blockchain development",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
