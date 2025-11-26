@@ -1,6 +1,6 @@
 // Config
 export { Config, ADMIN_KEYPAIR, DENY_LIST_ID, CLOCK_ID } from './config/config'
-export type { ConfigVars } from './config/config'
+export type { ConfigVars, BaseConfigVars, Network, ExtraVarsMap } from './config/config'
 export { STATIC_CONFIGS } from './config/static'
 
 // Tokens

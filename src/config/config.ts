@@ -10,9 +10,10 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env') })
 export const DENY_LIST_ID = '0x403'
 export const CLOCK_ID = '0x6'
 
-type Network = 'mainnet' | 'testnet' | 'devnet' | 'localnet'
+export type Network = 'mainnet' | 'testnet' | 'devnet' | 'localnet'
 
-export interface ConfigVars {
+// Base configuration that the SDK provides
+export interface BaseConfigVars {
     NETWORK: Network
     RPC: string
     PACKAGE_PATH: string
@@ -22,9 +23,22 @@ export interface ConfigVars {
     USDC_TREASURY_CAP?: string
 }
 
+// Default ConfigVars is just the base, but projects can extend it
+export type ConfigVars = BaseConfigVars
+
 export const ADMIN_KEYPAIR: Keypair = getKeypair(process.env.ADMIN_PRIVATE_KEY!)
 
-export class Config {
+/**
+ * Map of config keys to Move type patterns for finding object IDs during deployment
+ * The type pattern can use {packageId} placeholder which will be replaced with the deployed package ID
+ *
+ * Example: { SETUP_AUTH: "{packageId}::setup::SetupAuth" }
+ * Example: { TOKEN_TREASURY_CAP: "{packageId}::treasury::Treasury<{packageId}::token::TOKEN>" }
+ */
+export type ExtraVarsMap = Record<string, string>
+
+// Generic Config class that can be extended with custom types
+export class Config<TConfigVars extends BaseConfigVars = ConfigVars> {
     private static instance: Config | null = null
 
     private static getInstance(): Config {
@@ -42,7 +56,15 @@ export class Config {
         return env as Network
     }
 
-    static get vars(): ConfigVars {
+    /**
+     * Override this getter in your custom Config class to define extra variables
+     * that should be populated during deployment by finding objects by their Move types
+     */
+    static get extraVars(): ExtraVarsMap {
+        return {}
+    }
+
+    static get vars(): BaseConfigVars {
         const instance = this.getInstance()
         const NETWORK = instance.env
         dotenv.config({ path: path.resolve(process.cwd(), `.env.${NETWORK}`), override: true })
@@ -65,7 +87,7 @@ export class Config {
         }
     }
 
-    static write(config: ConfigVars): string {
+    static write<T extends BaseConfigVars>(config: T): string {
         const instance = this.getInstance()
         const env = instance.env
         const envFile = path.join(process.cwd(), `.env${env ? `.${env}` : ''}`)

@@ -62,7 +62,7 @@ export class PublishSingleton {
         return packageChng.packageId
     }
 
-    private static findObjectIdByType(type: string, fail: boolean = true): string {
+    public static findObjectIdByType(type: string, fail: boolean = true): string {
         const obj = this.findObjectChangeCreatedByType(this.publishResponse(), type)
         if (fail && !obj) {
             throw new Error(`Expected to find ${type} shared object created.`)
