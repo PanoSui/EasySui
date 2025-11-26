@@ -1,0 +1,16 @@
+{
+  "name": "move",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "test": "sui move test -p .",
+    "coverage": "pnpm test --coverage && sui move coverage summary -p .",
+    "lint": "npx prettier-move -c ../**/*.move",
+    "fix": "pnpm lint --write",
+    "clean": "rm -rf ./node_modules && rm -rf ./build"
+  },
+  "devDependencies": {
+    "@mysten/prettier-plugin-move": "^0.3.1",
+    "prettier": "^3.6.2"
+  }
+}

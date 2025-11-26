@@ -1,0 +1,34 @@
+{
+  "name": "sdk",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "deploy_localnet": "sui client switch --env localnet && cross-env NODE_ENV=localnet MVR_FALLBACK_NETWORK=testnet pnpm exec ts-node ./src/scripts/deploy.ts",
+    "deploy_devnet": "sui client switch --env devnet && cross-env NODE_ENV=devnet MVR_FALLBACK_NETWORK=testnet pnpm exec ts-node ./src/scripts/deploy.ts",
+    "deploy_testnet": "sui client switch --env testnet && cross-env NODE_ENV=testnet pnpm exec ts-node ./src/scripts/deploy.ts",
+    "deploy_mainnet": "sui client switch --env mainnet && cross-env NODE_ENV=mainnet pnpm exec ts-node ./src/scripts/deploy.ts",
+    "deploy_bytes_localnet": "sui client switch --env localnet && cross-env NODE_ENV=localnet MVR_FALLBACK_NETWORK=testnet pnpm exec ts-node ./src/scripts/getDeployBytes.ts",
+    "deploy_bytes_devnet": "sui client switch --env devnet && cross-env NODE_ENV=devnet MVR_FALLBACK_NETWORK=testnet pnpm exec ts-node ./src/scripts/getDeployBytes.ts",
+    "deploy_bytes_testnet": "sui client switch --env testnet && cross-env NODE_ENV=testnet MVR_FALLBACK_NETWORK=testnet pnpm exec ts-node ./src/scripts/getDeployBytes.ts",
+    "deploy_bytes_mainnet": "sui client switch --env mainnet && cross-env NODE_ENV=mainnet MVR_FALLBACK_NETWORK=testnet pnpm exec ts-node ./src/scripts/getDeployBytes.ts",
+    "mint": "pnpm exec ts-node ./src/scripts/mint.ts",
+    "test": "jest --runInBand",
+    "lint": "npx prettier -c **/*.ts",
+    "fix": "npx prettier -c **/*.ts --write",
+    "clean": "rm -rf ./node_modules"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "jest": "^30.1.3",
+    "prettier": "^3.6.2",
+    "ts-jest": "^29.4.1"
+  },
+  "dependencies": {
+    "@easysui/sdk": "^0.0.2",
+    "@mysten/sui": "^1.38.0",
+    "@types/node": "^24.3.1",
+    "cross-env": "^10.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  }
+}

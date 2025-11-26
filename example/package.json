@@ -1,0 +1,24 @@
+{
+  "name": "easysui-example",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": "24"
+  },
+  "scripts": {
+    "test": "pnpm -r test",
+    "coverage": "pnpm -r coverage",
+    "lint": "pnpm -r lint",
+    "fix": "pnpm -r fix",
+    "clean": "rm -rf ./node_modules && pnpm -r clean",
+    "start_localnet": "RUST_LOG=off sui start --with-faucet --force-regenesis",
+    "faucet": "sui client faucet",
+    "deploy_localnet": "pnpm -r deploy_localnet",
+    "deploy_devnet": "pnpm -r deploy_devnet",
+    "deploy_testnet": "pnpm -r deploy_testnet",
+    "deploy_mainnet": "pnpm -r deploy_mainnet"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
