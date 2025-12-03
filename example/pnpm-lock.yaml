@@ -20,11 +20,11 @@ importers:
   sdk:
     dependencies:
       '@easysui/sdk':
-        specifier: ^0.0.2
-        version: 0.0.2(@mysten/sui@1.45.0(typescript@5.9.3))
+        specifier: ../../src
+        version: link:../../src
       '@mysten/sui':
-        specifier: ^1.38.0
-        version: 1.45.0(typescript@5.9.3)
+        specifier: ^1.45.2
+        version: 1.45.2(typescript@5.9.3)
       '@types/node':
         specifier: ^24.3.1
         version: 24.10.1
@@ -236,11 +236,6 @@ packages:
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
     engines: {node: '>=12'}
 
-  '@easysui/sdk@0.0.2':
-    resolution: {integrity: sha512-XulARVZ02NO0+V4hA5lU76sKwbkFbuhKZhE8VC5MRLu5i3Ogb0T2dC91dYU5af0+N9a8NkRMYgJIej15gcZsQw==}
-    peerDependencies:
-      '@mysten/sui': ^1.38.0
-
   '@emnapi/core@1.7.1':
     resolution: {integrity: sha512-o1uhUASyo921r2XtHYOHy7gdkGLge8ghBEQHMWmyJFoXlpU58kIrhhN3w26lpQb6dspetweapMn2CSNwQ8I4wg==}
 
@@ -398,8 +393,8 @@ packages:
     resolution: {integrity: sha512-UCq9W95fyYI6EUG3Lm1mtEyxBqVHzg7PdofMX7nSxn6841GwC7Tv6VhdRcDIANMbq+m6e2whxgEi+xXtDSnXrg==}
     hasBin: true
 
-  '@mysten/sui@1.45.0':
-    resolution: {integrity: sha512-WYpZmrGWE/FeQaRhYrAYpHcHallj4BFIfSmjq6BkODzEhP9HfMplQAtd8AmtctwO7cpHJ+BjPUOguEAcf1gU4g==}
+  '@mysten/sui@1.45.2':
+    resolution: {integrity: sha512-gftf7fNpFSiXyfXpbtP2afVEnhc7p2m/MEYc/SO5pov92dacGKOpQIF7etZsGDI1Wvhv+dpph+ulRNpnYSs7Bg==}
     engines: {node: '>=18'}
 
   '@mysten/utils@0.2.0':
@@ -794,10 +789,6 @@ packages:
   diff@4.0.2:
     resolution: {integrity: sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==}
     engines: {node: '>=0.3.1'}
-
-  dotenv@17.2.3:
-    resolution: {integrity: sha512-JVUnt+DUIzu87TABbhPmNfVdBDt18BLOWjMUFJMSi/Qqg7NTYtabbvSNJGOJ7afbRuv9D/lngizHtP7QyLQ+9w==}
-    engines: {node: '>=12'}
 
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
@@ -1491,8 +1482,13 @@ packages:
     resolution: {integrity: sha512-kiGUalWN+rgBJ/1OHZsBtU4rXZOfj/7rKQxULKlIzwzQSvMJUUNgPwJEEh7gU6xEVxC0ahoOBvN2YI8GH6FNgA==}
     engines: {node: '>=10.12.0'}
 
-  valibot@0.36.0:
-    resolution: {integrity: sha512-CjF1XN4sUce8sBK9TixrDqFM7RwNkuXdJu174/AwmQUB62QbCQADg5lLe8ldBalFgtj1uKj+pKwDJiNo4Mn+eQ==}
+  valibot@1.2.0:
+    resolution: {integrity: sha512-mm1rxUsmOxzrwnX5arGS+U4T25RdvpPjPN4yR0u9pUBov9+zGVtO84tif1eY4r6zWxVxu3KzIyknJy3rxfRZZg==}
+    peerDependencies:
+      typescript: '>=5'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
 
   walker@1.0.8:
     resolution: {integrity: sha512-ts/8E8l5b7kY0vlWLewOkDXMmPdLcVV4GmOQLyxuSswIJsweeFZtAsMF7k1Nszz+TYBQrlYRmzOnr398y1JemQ==}
@@ -1750,12 +1746,6 @@ snapshots:
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.9
-
-  '@easysui/sdk@0.0.2(@mysten/sui@1.45.0(typescript@5.9.3))':
-    dependencies:
-      '@mysten/sui': 1.45.0(typescript@5.9.3)
-      '@types/node': 24.10.1
-      dotenv: 17.2.3
 
   '@emnapi/core@1.7.1':
     dependencies:
@@ -2024,7 +2014,7 @@ snapshots:
       prettier: 3.6.2
       web-tree-sitter: 0.20.8
 
-  '@mysten/sui@1.45.0(typescript@5.9.3)':
+  '@mysten/sui@1.45.2(typescript@5.9.3)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.12.0)
       '@mysten/bcs': 1.9.2
@@ -2040,7 +2030,7 @@ snapshots:
       gql.tada: 1.9.0(graphql@16.12.0)(typescript@5.9.3)
       graphql: 16.12.0
       poseidon-lite: 0.2.1
-      valibot: 0.36.0
+      valibot: 1.2.0(typescript@5.9.3)
     transitivePeerDependencies:
       - '@gql.tada/svelte-support'
       - '@gql.tada/vue-support'
@@ -2407,8 +2397,6 @@ snapshots:
   detect-newline@3.1.0: {}
 
   diff@4.0.2: {}
-
-  dotenv@17.2.3: {}
 
   eastasianwidth@0.2.0: {}
 
@@ -3240,7 +3228,9 @@ snapshots:
       '@types/istanbul-lib-coverage': 2.0.6
       convert-source-map: 2.0.0
 
-  valibot@0.36.0: {}
+  valibot@1.2.0(typescript@5.9.3):
+    optionalDependencies:
+      typescript: 5.9.3
 
   walker@1.0.8:
     dependencies:

@@ -1,6 +1,7 @@
 import { MoveType, SuiClient } from '../utils/sui_client'
 import { Keypair } from '@mysten/sui/cryptography'
 import { coinWithBalance, Transaction } from '@mysten/sui/transactions'
+import {COIN_REGISTRY} from "../config/config";
 
 export class Coin {
     public static get coinType(): string {
@@ -41,6 +42,23 @@ export class Coin {
             args: [treasuryId, amount],
             argTypes: [MoveType.object, MoveType.u64],
             withTransfer: true,
+        })
+    }
+
+    public static async finalizeRegistration(registrar: Keypair) {
+        const currencies = await SuiClient.getObjectsByType(COIN_REGISTRY, `0x2::coin_registry::Currency<${this.coinType}>`)
+
+        if (currencies.length === 0 || !currencies[0]) {
+            throw new Error('The registrar does not own the currency, please pass the currency id.')
+        }
+        const currencyId = currencies[0]
+
+        await SuiClient.moveCall({
+            signer: registrar,
+            target: `0x2::coin_registry::finalize_registration`,
+            typeArgs: [this.coinType],
+            args: [COIN_REGISTRY, currencyId],
+            argTypes: [MoveType.object, MoveType.object],
         })
     }
 

@@ -9,6 +9,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env') })
 
 export const DENY_LIST_ID = '0x403'
 export const CLOCK_ID = '0x6'
+export const COIN_REGISTRY = '0x000000000000000000000000000000000000000000000000000000000000000c'
 
 export type Network = 'mainnet' | 'testnet' | 'devnet' | 'localnet'
 

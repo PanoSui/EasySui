@@ -1,6 +1,6 @@
 import { ADMIN_KEYPAIR } from '@easysui/sdk'
 import { Drachma } from '../src/tokens/drachma'
-import {deploy} from "../src/utils/deploy";
+import { deploy } from '../src/utils/deploy'
 
 describe('Mint Drachma test', () => {
     beforeAll(async () => {

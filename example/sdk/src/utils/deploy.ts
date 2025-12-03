@@ -1,6 +1,10 @@
-import {deploy as baseDeploy} from '@easysui/sdk'
+import {ADMIN_KEYPAIR, deploy as baseDeploy} from '@easysui/sdk'
 import {Config} from "./config";
+import {Drachma} from "../tokens/drachma";
 
 export async function deploy() {
-    return await baseDeploy(Config)
+    const deployMsg = await baseDeploy(Config)
+    await Drachma.finalizeRegistration(ADMIN_KEYPAIR)
+
+    return deployMsg + `\nThe ${Drachma.coinType} was registered.`
 }
