@@ -1,6 +1,6 @@
 {
   "name": "@easysui/sdk",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Easy-to-use TypeScript SDK for Sui blockchain development",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -27,6 +27,7 @@
     "prepublishOnly": "pnpm build",
     "test": "jest",
     "changeset": "changeset",
+    "bump": "pnpm changeset version",
     "version": "changeset version",
     "release": "pnpm build && changeset publish --access public"
   },
