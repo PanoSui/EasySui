@@ -16,8 +16,7 @@ export class PublishSingleton {
 
     private constructor(private readonly publishResp: SuiTransactionBlockResponse) {}
 
-    private static getDeployVars(signer?: Keypair, packagePath?: string): [Keypair, string] {
-        signer ??= ADMIN_KEYPAIR
+    private static getPackagePath(packagePath?: string): string {
         packagePath ??= Config.vars.PACKAGE_PATH
 
         if (!packagePath) {
@@ -26,14 +25,15 @@ export class PublishSingleton {
             )
         }
 
-        return [signer, packagePath]
+        return packagePath
     }
 
     public static async publish(signer?: Keypair, packagePath?: string) {
-        const [_signer, _packagePath] = this.getDeployVars(signer, packagePath)
+        signer ??= ADMIN_KEYPAIR
+        const _packagePath = this.getPackagePath(packagePath)
 
         if (!PublishSingleton.instance) {
-            const publishResp = await PublishSingleton.publishPackage(_signer, _packagePath)
+            const publishResp = await PublishSingleton.publishPackage(signer, _packagePath)
             const packageId = this.findPublishedPackage(publishResp)?.packageId
             if (!packageId) {
                 throw new Error('Expected to find package published')
@@ -81,7 +81,7 @@ export class PublishSingleton {
         )
     }
 
-    static getPublishTx(packagePath: string, signer: Keypair) {
+    static getPublishTx(packagePath: string, sender: string) {
         const transaction = new Transaction()
 
         if (!fs.existsSync(packagePath)) {
@@ -106,16 +106,16 @@ export class PublishSingleton {
             dependencies,
         })
 
-        transaction.transferObjects([upgradeCap], signer.toSuiAddress())
+        transaction.transferObjects([upgradeCap], sender)
         return transaction
     }
 
-    static async getPublishBytes(signer?: Keypair, packagePath?: string): Promise<string> {
-        const [_signer, _packagePath] = this.getDeployVars(signer, packagePath)
-        const transaction = this.getPublishTx(_packagePath, _signer)
-        transaction.setSender(_signer.toSuiAddress())
+    static async getPublishBytes(signer?: string, packagePath?: string): Promise<string> {
+        signer ??= ADMIN_KEYPAIR.toSuiAddress()
+        const _packagePath = this.getPackagePath(packagePath)
+        const transaction = this.getPublishTx(_packagePath, signer)
         const client = new SuiClient({ url: Config.vars.RPC })
-        const txBytes = await transaction.build({ client })
+        const txBytes = await transaction.build({ client, onlyTransactionKind: true })
         return Buffer.from(txBytes).toString('base64')
     }
 
@@ -123,7 +123,7 @@ export class PublishSingleton {
         signer: Keypair,
         packagePath: string
     ): Promise<SuiTransactionBlockResponse> {
-        const transaction = this.getPublishTx(packagePath, signer)
+        const transaction = this.getPublishTx(packagePath, signer.toSuiAddress())
         const client = new SuiClient({ url: Config.vars.RPC })
         const resp = await client.signAndExecuteTransaction({
             transaction,
