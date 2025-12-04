@@ -4,9 +4,11 @@
   "description": "Easy-to-use TypeScript SDK for Sui blockchain development",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
+  "browser": "dist/browser/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "browser": "./dist/browser/index.mjs",
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
