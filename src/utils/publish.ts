@@ -1,4 +1,3 @@
-import fs from 'fs'
 import {
     SuiClient,
     SuiObjectChangeCreated,
@@ -8,8 +7,6 @@ import {
 import { Keypair } from '@mysten/sui/cryptography'
 import { ADMIN_KEYPAIR, Config } from '../config/config'
 import { Transaction } from '@mysten/sui/transactions'
-
-import { execSync } from 'child_process'
 
 export class PublishSingleton {
     private static instance: PublishSingleton | null = null
@@ -82,6 +79,9 @@ export class PublishSingleton {
     }
 
     static getPublishTx(packagePath: string, sender: string) {
+        const fs = require('fs')
+        const { execSync } = require('child_process')
+
         const transaction = new Transaction()
 
         if (!fs.existsSync(packagePath)) {
