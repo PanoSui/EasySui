@@ -1,4 +1,3 @@
-import * as fs from 'fs'
 import { Transaction } from '@mysten/sui/transactions'
 import { SuiTransactionBlockResponse } from '@mysten/sui/client'
 import { Config } from '../config/config'
@@ -18,6 +17,7 @@ const HEADERS = [
 ]
 
 export function analyze_cost(ptb: Transaction, resp: SuiTransactionBlockResponse) {
+    const fs = require('fs')
     if (!process.env.COST_ANALYZER_ENABLED) {
         return
     }
