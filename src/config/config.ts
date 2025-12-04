@@ -26,7 +26,7 @@ export interface BaseConfigVars {
 // Default ConfigVars is just the base, but projects can extend it
 export type ConfigVars = BaseConfigVars
 
-export const ADMIN_KEYPAIR: Keypair = getKeypair(process.env.ADMIN_PRIVATE_KEY!)
+export const ADMIN_KEYPAIR: Keypair | undefined = process.env.ADMIN_PRIVATE_KEY ? getKeypair(process.env.ADMIN_PRIVATE_KEY) : undefined
 
 /**
  * Map of config keys to Move type patterns for finding object IDs during deployment

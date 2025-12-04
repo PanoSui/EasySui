@@ -13,7 +13,7 @@ export async function createFundedWallet(usdcAmount?: bigint) {
     await faucet(wallet.toSuiAddress())
 
     if (usdcAmount) {
-        await USDC.faucet(usdcAmount, wallet.toSuiAddress(), ADMIN_KEYPAIR)
+        await USDC.faucet(usdcAmount, wallet.toSuiAddress(), ADMIN_KEYPAIR!)
     }
 
     return wallet
