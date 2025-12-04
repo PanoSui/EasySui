@@ -49,7 +49,7 @@ export class Config<TConfigVars extends BaseConfigVars = ConfigVars> {
     }
 
     get env(): Network {
-        let env = process.env.NODE_ENV
+        let env = process.env.SUI_NETWORK || process.env.NEXT_PUBLIC_SUI_NETWORK
         if (!['mainnet', 'testnet', 'devnet', 'localnet'].includes(env || '')) {
             env = 'localnet'
         }
@@ -73,10 +73,10 @@ export class Config<TConfigVars extends BaseConfigVars = ConfigVars> {
             NETWORK,
             RPC: getFullnodeUrl(NETWORK),
             PACKAGE_PATH: process.env.PACKAGE_PATH || '',
-            PACKAGE_ID: process.env.PACKAGE_ID || '',
-            UPGRADE_CAP_ID: process.env.UPGRADE_CAP_ID || '',
-            USDC_TREASURY_CAP: process.env.USDC_TREASURY_CAP,
-            USDC_PACKAGE_ID: process.env.USDC_PACKAGE_ID,
+            PACKAGE_ID: process.env.PACKAGE_ID || process.env.NEXT_PUBLIC_PACKAGE_ID || '',
+            UPGRADE_CAP_ID: process.env.UPGRADE_CAP_ID || process.env.NEXT_PUBLIC_UPGRADE_CAP_ID || '',
+            USDC_TREASURY_CAP: process.env.USDC_TREASURY_CAP || process.env.NEXT_PUBLIC_USDC_TREASURY_CAP,
+            USDC_PACKAGE_ID: process.env.USDC_PACKAGE_ID || process.env.NEXT_PUBLIC_USDC_PACKAGE_ID,
         }
 
         const staticVars = STATIC_CONFIGS[NETWORK] || {}
