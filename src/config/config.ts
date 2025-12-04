@@ -1,5 +1,4 @@
 import path from 'path'
-import fs from 'fs'
 import dotenv from 'dotenv'
 import { Keypair } from '@mysten/sui/cryptography'
 import { getFullnodeUrl } from '@mysten/sui/client'
@@ -89,6 +88,7 @@ export class Config<TConfigVars extends BaseConfigVars = ConfigVars> {
     }
 
     static write<T extends BaseConfigVars>(config: T): string {
+        const fs = require('fs')
         const instance = this.getInstance()
         const env = instance.env
         const envFile = path.join(process.cwd(), `.env${env ? `.${env}` : ''}`)
