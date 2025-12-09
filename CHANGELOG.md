@@ -1,5 +1,11 @@
 # @easysui/sdk
 
+## 0.1.1
+
+### Patch Changes
+
+- Fix the MoveType.u8
+
 ## 0.1.0
 
 ### Minor Changes

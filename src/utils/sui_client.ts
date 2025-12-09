@@ -6,7 +6,7 @@ import { bcs } from '@mysten/sui/bcs'
 import { analyze_cost } from './cost_analyzer'
 
 export enum MoveType {
-    u8,
+    u8 = 1,
     u16,
     u32,
     u64,
