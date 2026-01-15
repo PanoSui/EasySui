@@ -1,5 +1,11 @@
 # @easysui/sdk
 
+## 0.2.0
+
+### Minor Changes
+
+- Align with newest version of Sui
+
 ## 0.1.1
 
 ### Patch Changes
