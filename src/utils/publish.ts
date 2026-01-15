@@ -29,7 +29,7 @@ export class PublishSingleton {
     }
 
     public static async publish(signer?: Keypair, packagePath?: string) {
-        signer ??= ADMIN_KEYPAIR
+        signer ??= ADMIN_KEYPAIR!
         const _packagePath = this.getPackagePath(packagePath)
 
         if (!PublishSingleton.instance) {
@@ -92,10 +92,11 @@ export class PublishSingleton {
             fs.unlinkSync(`${packagePath}/Move.lock`)
         }
         fs.rmSync(`${packagePath}/build`, { recursive: true, force: true })
-
-        let buildCommand = `sui move build --dump-bytecode-as-base64 --path ${packagePath}`
         const network = Config.vars.NETWORK
-        if (network === 'localnet' || network === 'devnet') {
+
+        const e = network === 'mainnet' ? 'mainnet' : 'testnet'
+        let buildCommand = `sui move build -e ${e} --dump-bytecode-as-base64 --path ${packagePath}`
+        if (network === 'localnet' || network === 'devnet' || network === 'testnet') { // TODO: remove testnet
             buildCommand += ' --with-unpublished-dependencies'
         }
 
@@ -111,7 +112,7 @@ export class PublishSingleton {
     }
 
     static async getPublishBytes(signer?: string, packagePath?: string): Promise<string> {
-        signer ??= ADMIN_KEYPAIR.toSuiAddress()
+        signer ??= ADMIN_KEYPAIR!.toSuiAddress()
         const _packagePath = this.getPackagePath(packagePath)
         const transaction = this.getPublishTx(_packagePath, signer)
         const client = new SuiClient({ url: Config.vars.RPC })

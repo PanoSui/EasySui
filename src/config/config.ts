@@ -4,14 +4,13 @@ import dotenv from 'dotenv'
 import { Keypair } from '@mysten/sui/cryptography'
 import { getFullnodeUrl } from '@mysten/sui/client'
 import { getKeypair } from '../utils/keypair'
-import { STATIC_CONFIGS } from './static'
-dotenv.config({ path: path.resolve(process.cwd(), '.env') })
+import { STATIC_CONFIGS, Network } from './static'
+import {SUI_CLOCK_OBJECT_ID} from "@mysten/sui/utils";
+dotenv.config({ path: path.resolve(process.cwd(), '.env'), quiet: true })
 
 export const DENY_LIST_ID = '0x403'
-export const CLOCK_ID = '0x6'
+export const CLOCK_ID = SUI_CLOCK_OBJECT_ID
 export const COIN_REGISTRY = '0x000000000000000000000000000000000000000000000000000000000000000c'
-
-export type Network = 'mainnet' | 'testnet' | 'devnet' | 'localnet'
 
 // Base configuration that the SDK provides
 export interface BaseConfigVars {
@@ -27,7 +26,7 @@ export interface BaseConfigVars {
 // Default ConfigVars is just the base, but projects can extend it
 export type ConfigVars = BaseConfigVars
 
-export const ADMIN_KEYPAIR: Keypair = getKeypair(process.env.ADMIN_PRIVATE_KEY!)
+export const ADMIN_KEYPAIR: Keypair | undefined = process.env.ADMIN_PRIVATE_KEY ? getKeypair(process.env.ADMIN_PRIVATE_KEY) : undefined
 
 /**
  * Map of config keys to Move type patterns for finding object IDs during deployment
@@ -50,7 +49,7 @@ export class Config<TConfigVars extends BaseConfigVars = ConfigVars> {
     }
 
     get env(): Network {
-        let env = process.env.NODE_ENV
+        let env = process.env.NETWORK
         if (!['mainnet', 'testnet', 'devnet', 'localnet'].includes(env || '')) {
             env = 'localnet'
         }
@@ -68,7 +67,7 @@ export class Config<TConfigVars extends BaseConfigVars = ConfigVars> {
     static get vars(): BaseConfigVars {
         const instance = this.getInstance()
         const NETWORK = instance.env
-        dotenv.config({ path: path.resolve(process.cwd(), `.env.${NETWORK}`), override: true })
+        dotenv.config({ path: path.resolve(process.cwd(), `.env.${NETWORK}`), override: true, quiet: true })
 
         const envVars = {
             NETWORK,
