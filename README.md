@@ -96,7 +96,7 @@ This package uses [Changesets](https://github.com/changesets/changesets) for ver
 # Add a changeset
 pnpm changeset && pnpm bump 
 
-// commit the bump
+// commit the bump and git push
 
 # Build and publish to npm
 pnpm release
