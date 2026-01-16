@@ -1,5 +1,11 @@
 # @easysui/sdk
 
+## 0.2.1
+
+### Patch Changes
+
+- New way of publishing packages
+
 ## 0.2.0
 
 ### Minor Changes
