@@ -1,13 +1,11 @@
 import fs from 'fs'
 import {
-    SuiClient,
     SuiObjectChangeCreated,
     SuiObjectChangePublished,
     SuiTransactionBlockResponse,
 } from '@mysten/sui/client'
 import { Keypair } from '@mysten/sui/cryptography'
 import { ADMIN_KEYPAIR, Config } from '../config/config'
-import { Transaction } from '@mysten/sui/transactions'
 
 import { execSync } from 'child_process'
 
@@ -81,8 +79,8 @@ export class PublishSingleton {
         )
     }
 
-    static getPublishTx(packagePath: string, sender: string) {
-        const transaction = new Transaction()
+    private static getPublishCmd(packagePath: string, sender: string, inBytes: boolean = false) {
+        const network = Config.vars.NETWORK
 
         if (!fs.existsSync(packagePath)) {
             throw new Error(`Package doesn't exist under: ${packagePath}`)
@@ -91,54 +89,44 @@ export class PublishSingleton {
         if (fs.existsSync(`${packagePath}/Move.lock`)) {
             fs.unlinkSync(`${packagePath}/Move.lock`)
         }
-        fs.rmSync(`${packagePath}/build`, { recursive: true, force: true })
-        const network = Config.vars.NETWORK
 
-        const e = network === 'mainnet' ? 'mainnet' : 'testnet'
-        let buildCommand = `sui move build -e ${e} --dump-bytecode-as-base64 --path ${packagePath}`
-        if (network === 'localnet' || network === 'devnet' || network === 'testnet') { // TODO: remove testnet
+        if (fs.existsSync(`Pub.${network}.toml`)) {
+            fs.unlinkSync(`Pub.${network}.toml`)
+        }
+        fs.rmSync(`${packagePath}/build`, { recursive: true, force: true })
+
+        const isEphemeralChain = network !== 'mainnet' && network !== 'testnet'
+        const publishCmd = isEphemeralChain ? `test-publish --build-env testnet` : 'publish'
+
+        let buildCommand = `sui client ${publishCmd} ${packagePath}`
+
+        if (network === 'localnet' || network === 'devnet') {
             buildCommand += ' --with-unpublished-dependencies'
         }
 
-        const { modules, dependencies } = JSON.parse(execSync(buildCommand, { encoding: 'utf-8' }))
+        buildCommand += inBytes ? ' --serialize-unsigned-transaction' : ' --json'
 
-        const upgradeCap = transaction.publish({
-            modules,
-            dependencies,
-        })
-
-        transaction.transferObjects([upgradeCap], sender)
-        return transaction
+        return buildCommand
     }
 
     static async getPublishBytes(signer?: string, packagePath?: string): Promise<string> {
         signer ??= ADMIN_KEYPAIR!.toSuiAddress()
         const _packagePath = this.getPackagePath(packagePath)
-        const transaction = this.getPublishTx(_packagePath, signer)
-        const client = new SuiClient({ url: Config.vars.RPC })
-        const txBytes = await transaction.build({ client, onlyTransactionKind: true })
-        return Buffer.from(txBytes).toString('base64')
+        const cmd = this.getPublishCmd(_packagePath, signer, true)
+        return execSync(cmd, { encoding: 'utf-8' }).trim()
     }
 
     static async publishPackage(
         signer: Keypair,
         packagePath: string
     ): Promise<SuiTransactionBlockResponse> {
-        const transaction = this.getPublishTx(packagePath, signer.toSuiAddress())
-        const client = new SuiClient({ url: Config.vars.RPC })
-        const resp = await client.signAndExecuteTransaction({
-            transaction,
-            signer,
-            options: {
-                showObjectChanges: true,
-                showEffects: true,
-            },
-        })
-        if (resp.effects?.status.status !== 'success') {
-            throw new Error(`Failure during publish transaction:\n${JSON.stringify(resp, null, 2)}`)
+        const cmd = this.getPublishCmd(packagePath, signer.toSuiAddress())
+        const res = execSync(cmd, { encoding: 'utf-8' })
+        const match = res.match(/\{[\s\S]*\}/);
+        if (!match) {
+            throw new Error(`No JSON found in the publish command output: ${res}`);
         }
-        await client.waitForTransaction({ digest: resp.digest })
-        return resp
+        return JSON.parse(match[0])
     }
 
     static findPublishedPackage(

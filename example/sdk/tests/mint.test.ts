@@ -8,7 +8,7 @@ describe('Mint Drachma test', () => {
     })
 
     it('should mint drachma coins for admin', async () => {
-        await Drachma.mint(1_000_000n, ADMIN_KEYPAIR)
-        await Drachma.assertBalance(ADMIN_KEYPAIR, 1_000_000n)
+        await Drachma.mint(1_000_000n, ADMIN_KEYPAIR!)
+        await Drachma.assertBalance(ADMIN_KEYPAIR!, 1_000_000n)
     })
 })

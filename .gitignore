@@ -15,3 +15,6 @@ dist
 !.env.mainnet
 
 gas_cost_estimation.csv
+
+.npmrc
+Pub.*.toml

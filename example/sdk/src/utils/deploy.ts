@@ -4,7 +4,7 @@ import {Drachma} from "../tokens/drachma";
 
 export async function deploy() {
     const deployMsg = await baseDeploy(Config)
-    await Drachma.finalizeRegistration(ADMIN_KEYPAIR)
+    await Drachma.finalizeRegistration(ADMIN_KEYPAIR!)
 
     return deployMsg + `\nThe ${Drachma.coinType} was registered.`
 }
