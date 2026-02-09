@@ -3,7 +3,7 @@ import {
     SuiObjectChangeCreated,
     SuiObjectChangePublished,
     SuiTransactionBlockResponse,
-} from '@mysten/sui/client'
+} from '@mysten/sui/jsonRpc'
 import { Keypair } from '@mysten/sui/cryptography'
 import { ADMIN_KEYPAIR, Config } from '../config/config'
 

@@ -59,11 +59,11 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
-    "@mysten/sui": "^1.45.2",
+    "@mysten/sui": "^2.3.1",
     "@types/node": "^24.3.1",
     "dotenv": "^17.2.2"
   },
   "peerDependencies": {
-    "@mysten/sui": "^1.45.2"
+    "@mysten/sui": "^2.3.1"
   }
 }
