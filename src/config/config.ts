@@ -2,7 +2,7 @@ import path from 'path'
 import fs from 'fs'
 import dotenv from 'dotenv'
 import { Keypair } from '@mysten/sui/cryptography'
-import { getFullnodeUrl } from '@mysten/sui/client'
+import { getJsonRpcFullnodeUrl } from '@mysten/sui/jsonRpc'
 import { getKeypair } from '../utils/keypair'
 import { STATIC_CONFIGS, Network } from './static'
 import {SUI_CLOCK_OBJECT_ID} from "@mysten/sui/utils";
@@ -71,7 +71,7 @@ export class Config<TConfigVars extends BaseConfigVars = ConfigVars> {
 
         const envVars = {
             NETWORK,
-            RPC: getFullnodeUrl(NETWORK),
+            RPC: getJsonRpcFullnodeUrl(NETWORK),
             PACKAGE_PATH: process.env.PACKAGE_PATH || '',
             PACKAGE_ID: process.env.PACKAGE_ID || '',
             UPGRADE_CAP_ID: process.env.UPGRADE_CAP_ID || '',

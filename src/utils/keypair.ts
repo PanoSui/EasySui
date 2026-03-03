@@ -17,6 +17,6 @@ export function getKeypair(privkey: string): Keypair {
             return Secp256r1Keypair.fromSecretKey(parsed.secretKey)
         }
         default:
-            throw new Error(`Key scheme ${parsed.schema} not supported`)
+            throw new Error(`Key scheme ${parsed.scheme} not supported`)
     }
 }

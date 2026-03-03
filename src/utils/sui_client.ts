@@ -1,4 +1,4 @@
-import { SuiClient as SC } from '@mysten/sui/client'
+import { SuiJsonRpcClient as SC } from '@mysten/sui/jsonRpc'
 import { toBase64, fromBase64, fromHex } from '@mysten/sui/utils'
 import { Config } from '../config/config'
 import { Transaction } from '@mysten/sui/transactions'
@@ -36,7 +36,7 @@ export class SuiClient {
     private client: SC
 
     private constructor() {
-        this.client = new SC({ url: Config.vars.RPC })
+        this.client = new SC({ url: Config.vars.RPC, network: Config.vars.NETWORK })
     }
 
     private static getInstance(): SuiClient {

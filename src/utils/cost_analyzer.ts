@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 import { Transaction } from '@mysten/sui/transactions'
-import { SuiTransactionBlockResponse } from '@mysten/sui/client'
+import { SuiTransactionBlockResponse } from '@mysten/sui/jsonRpc'
 import { Config } from '../config/config'
 
 const COST_ANALYSIS_FILE = './gas_cost_estimation.csv'
@@ -27,14 +27,14 @@ export function analyze_cost(ptb: Transaction, resp: SuiTransactionBlockResponse
 
     const columns: any = [Config.vars.NETWORK, Date.now(), resp.digest]
 
-    const moveCalls = ptb.blockData.transactions.filter((txItem) => txItem.kind === 'MoveCall')
+    const moveCalls = ptb.getData().commands.filter((txItem) => txItem.$kind === 'MoveCall')
     const moveCall = moveCalls.pop()
-    if (!moveCall?.target) {
+    if (!moveCall) {
         return
     }
-    const splits = moveCall.target.split('::')
-    columns.push(splits[0])
-    columns.push(`${splits[1]}::${splits[2]}`)
+    const { package: pkg, module: mod, function: fn } = moveCall.MoveCall
+    columns.push(pkg)
+    columns.push(`${mod}::${fn}`)
 
     const gasUsed = resp.effects?.gasUsed
     columns.push(gasUsed?.computationCost || 'N/A')
