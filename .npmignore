@@ -6,7 +6,7 @@ src/
 # Config files
 tsconfig.json
 tsup.config.ts
-jest.config.js
+vitest.config.ts
 .prettierrc
 
 # Development

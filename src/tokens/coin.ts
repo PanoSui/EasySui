@@ -2,6 +2,7 @@ import { MoveType, SuiClient } from '../utils/sui_client'
 import { Keypair } from '@mysten/sui/cryptography'
 import { coinWithBalance, Transaction } from '@mysten/sui/transactions'
 import {COIN_REGISTRY} from "../config/config";
+import { expect } from "vitest";
 
 export class Coin {
     public static get coinType(): string {

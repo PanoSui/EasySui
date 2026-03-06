@@ -1,3 +1,5 @@
+import { describe, it, beforeAll } from "vitest";
+
 import { ADMIN_KEYPAIR } from '@easysui/sdk'
 import { Drachma } from '../src/tokens/drachma'
 import { deploy } from '../src/utils/deploy'

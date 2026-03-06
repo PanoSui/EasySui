@@ -1,18 +1,15 @@
 import fs from 'fs'
-import {
-    SuiObjectChangeCreated,
-    SuiObjectChangePublished,
-    SuiTransactionBlockResponse,
-} from '@mysten/sui/jsonRpc'
 import { Keypair } from '@mysten/sui/cryptography'
 import { ADMIN_KEYPAIR, Config } from '../config/config'
+import { normalizeStructTag, normalizeTypeTag, normalizeSuiAddress } from '@mysten/sui/utils'
 
 import { execSync } from 'child_process'
+import {ChangedObjectFlat, SuiPublishResponse} from "../types/grpc";
 
 export class PublishSingleton {
     private static instance: PublishSingleton | null = null
 
-    private constructor(private readonly publishResp: SuiTransactionBlockResponse) {}
+    private constructor(private readonly publishResp: SuiPublishResponse) {}
 
     private static getPackagePath(packagePath?: string): string {
         packagePath ??= Config.vars.PACKAGE_PATH
@@ -32,10 +29,6 @@ export class PublishSingleton {
 
         if (!PublishSingleton.instance) {
             const publishResp = await PublishSingleton.publishPackage(signer, _packagePath)
-            const packageId = this.findPublishedPackage(publishResp)?.packageId
-            if (!packageId) {
-                throw new Error('Expected to find package published')
-            }
             // suiClientGen(packageId)
             PublishSingleton.instance = new PublishSingleton(publishResp)
         }
@@ -48,7 +41,7 @@ export class PublishSingleton {
         return PublishSingleton.instance
     }
 
-    public static publishResponse(): SuiTransactionBlockResponse {
+    public static publishResponse(): SuiPublishResponse {
         return this.getInstance().publishResp
     }
 
@@ -57,7 +50,7 @@ export class PublishSingleton {
         if (!packageChng) {
             throw new Error('Expected to find package published')
         }
-        return packageChng.packageId
+        return packageChng.objectId
     }
 
     public static findObjectIdByType(type: string, fail: boolean = true): string {
@@ -69,7 +62,7 @@ export class PublishSingleton {
     }
 
     public static get upgradeCapId(): string {
-        return this.findObjectIdByType(`0x2::package::UpgradeCap`)
+        return this.findObjectIdByType('0x2::package::UpgradeCap')
     }
 
     public static get usdcTreasuryCap(): string {
@@ -89,10 +82,6 @@ export class PublishSingleton {
         if (fs.existsSync(`${packagePath}/Move.lock`)) {
             fs.unlinkSync(`${packagePath}/Move.lock`)
         }
-
-        if (fs.existsSync(`Pub.${network}.toml`)) {
-            fs.unlinkSync(`Pub.${network}.toml`)
-        }
         fs.rmSync(`${packagePath}/build`, { recursive: true, force: true })
 
         const isEphemeralChain = network !== 'mainnet' && network !== 'testnet'
@@ -100,11 +89,11 @@ export class PublishSingleton {
 
         let buildCommand = `sui client ${publishCmd} ${packagePath}`
 
-        if (network === 'localnet' || network === 'devnet') {
-            buildCommand += ' --with-unpublished-dependencies'
+        if (isEphemeralChain) {
+            buildCommand += ' --publish-unpublished-deps'
         }
 
-        buildCommand += inBytes ? ' --serialize-unsigned-transaction' : ' --json'
+        buildCommand += inBytes ? ` --serialize-unsigned-transaction --sender ${sender}` : ' --json'
 
         return buildCommand
     }
@@ -119,7 +108,7 @@ export class PublishSingleton {
     static async publishPackage(
         signer: Keypair,
         packagePath: string
-    ): Promise<SuiTransactionBlockResponse> {
+    ): Promise<SuiPublishResponse> {
         const cmd = this.getPublishCmd(packagePath, signer.toSuiAddress())
         const res = execSync(cmd, { encoding: 'utf-8' })
         const match = res.match(/\{[\s\S]*\}/);
@@ -130,20 +119,29 @@ export class PublishSingleton {
     }
 
     static findPublishedPackage(
-        resp: SuiTransactionBlockResponse
-    ): SuiObjectChangePublished | undefined {
-        return resp.objectChanges?.find(
-            (chng): chng is SuiObjectChangePublished => chng.type === 'published'
-        )
+        resp: SuiPublishResponse
+    ): ChangedObjectFlat | undefined {
+        return resp.changed_objects?.find((c) => c.objectType === 'package')
     }
 
     static findObjectChangeCreatedByType(
-        resp: SuiTransactionBlockResponse,
+        resp: SuiPublishResponse,
         type: string
-    ): SuiObjectChangeCreated | undefined {
-        return resp.objectChanges?.find(
-            (chng): chng is SuiObjectChangeCreated =>
-                chng.type === 'created' && chng.objectType === type
+    ): ChangedObjectFlat | undefined {
+        const normalizedType = normalizeStructTag(type)
+        return resp.changed_objects?.find(
+            (c) => c.idOperation === 'CREATED'
+                && (c.objectType === type || c.objectType === normalizedType)
         )
+    }
+
+    static get pubFile() {
+        return `Pub.${Config.vars.NETWORK}.toml`
+    }
+
+    static cleanPubFile() {
+        if (fs.existsSync(this.pubFile)) {
+            fs.unlinkSync(this.pubFile)
+        }
     }
 }
