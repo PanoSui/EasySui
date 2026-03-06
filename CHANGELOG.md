@@ -1,5 +1,11 @@
 # @easysui/sdk
 
+## 1.0.0
+
+### Major Changes
+
+- Using mysten sui 2.6.0
+
 ## 0.2.1
 
 ### Patch Changes

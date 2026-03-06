@@ -94,7 +94,7 @@ This package uses [Changesets](https://github.com/changesets/changesets) for ver
 
 ```bash
 # Add a changeset
-pnpm changeset && pnpm bump 
+pnpm run changeset && pnpm bump 
 
 // commit the bump and git push
 
