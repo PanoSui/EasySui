@@ -1,10 +1,9 @@
 import fs from 'fs'
 import { Keypair } from '@mysten/sui/cryptography'
 import { ADMIN_KEYPAIR, Config } from '../config/config'
-import { normalizeStructTag, normalizeTypeTag, normalizeSuiAddress } from '@mysten/sui/utils'
-
-import { execSync } from 'child_process'
+import { normalizeStructTag } from '@mysten/sui/utils'
 import {ChangedObjectFlat, SuiPublishResponse} from "../types/grpc";
+import {execCmd} from "./exec";
 
 export class PublishSingleton {
     private static instance: PublishSingleton | null = null
@@ -102,7 +101,7 @@ export class PublishSingleton {
         signer ??= ADMIN_KEYPAIR!.toSuiAddress()
         const _packagePath = this.getPackagePath(packagePath)
         const cmd = this.getPublishCmd(_packagePath, signer, true)
-        return execSync(cmd, { encoding: 'utf-8' }).trim()
+        return execCmd(cmd)
     }
 
     static async publishPackage(
@@ -110,10 +109,10 @@ export class PublishSingleton {
         packagePath: string
     ): Promise<SuiPublishResponse> {
         const cmd = this.getPublishCmd(packagePath, signer.toSuiAddress())
-        const res = execSync(cmd, { encoding: 'utf-8' })
-        const match = res.match(/\{[\s\S]*\}/);
+        const res = await execCmd(cmd)
+        const match = res.match(/\{[\s\S]*\}/)
         if (!match) {
-            throw new Error(`No JSON found in the publish command output: ${res}`);
+            throw new Error(`No JSON found in the publish command output: ${res}`)
         }
         return JSON.parse(match[0])
     }
