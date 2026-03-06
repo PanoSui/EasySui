@@ -1,5 +1,11 @@
 # @easysui/sdk
 
+## 1.0.1
+
+### Patch Changes
+
+- Support longer publish command outputs
+
 ## 1.0.0
 
 ### Major Changes
