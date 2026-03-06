@@ -1,4 +1,4 @@
-import { describe, it, beforeAll } from "vitest";
+import { describe, it, beforeAll } from 'vitest'
 
 import { ADMIN_KEYPAIR } from '@easysui/sdk'
 import { Drachma } from '../src/tokens/drachma'
