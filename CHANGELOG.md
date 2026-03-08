@@ -1,5 +1,11 @@
 # @easysui/sdk
 
+## 1.1.0
+
+### Minor Changes
+
+- Add configurable pub file path
+
 ## 1.0.1
 
 ### Patch Changes
