@@ -19,6 +19,7 @@ export interface BaseConfigVars {
     PACKAGE_PATH: string
     PACKAGE_ID: string
     UPGRADE_CAP_ID: string
+    PUBFILE_PATH?: string
     USDC_PACKAGE_ID?: string
     USDC_TREASURY_CAP?: string
 }
@@ -73,6 +74,7 @@ export class Config<TConfigVars extends BaseConfigVars = ConfigVars> {
             NETWORK,
             RPC: getJsonRpcFullnodeUrl(NETWORK),
             PACKAGE_PATH: process.env.PACKAGE_PATH || '',
+            PUBFILE_PATH: process.env.PUBFILE_PATH || '',
             PACKAGE_ID: process.env.PACKAGE_ID || '',
             UPGRADE_CAP_ID: process.env.UPGRADE_CAP_ID || '',
             USDC_TREASURY_CAP: process.env.USDC_TREASURY_CAP,

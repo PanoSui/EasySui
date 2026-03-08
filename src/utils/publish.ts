@@ -22,12 +22,25 @@ export class PublishSingleton {
         return packagePath
     }
 
-    public static async publish(signer?: Keypair, packagePath?: string) {
+    private static getPubFilePath(pubFilePath?: string): string {
+        pubFilePath ??= Config.vars.PUBFILE_PATH
+
+        if (!pubFilePath) {
+            throw new Error(
+                `You must set the \`PUBFILE_PATH\` environment variable to your Pub.${Config.vars.NETWORK}.toml path.`
+            )
+        }
+
+        return pubFilePath
+    }
+
+    public static async publish(signer?: Keypair, packagePath?: string, pubFilePath?: string) {
         signer ??= ADMIN_KEYPAIR!
         const _packagePath = this.getPackagePath(packagePath)
+        const _pubFilePath = this.getPubFilePath(pubFilePath)
 
         if (!PublishSingleton.instance) {
-            const publishResp = await PublishSingleton.publishPackage(signer, _packagePath)
+            const publishResp = await PublishSingleton.publishPackage(signer, _packagePath, _pubFilePath)
             // suiClientGen(packageId)
             PublishSingleton.instance = new PublishSingleton(publishResp)
         }
@@ -71,7 +84,7 @@ export class PublishSingleton {
         )
     }
 
-    private static getPublishCmd(packagePath: string, sender: string, inBytes: boolean = false) {
+    private static getPublishCmd(packagePath: string, sender: string, pubFilePath: string, inBytes: boolean = false) {
         const network = Config.vars.NETWORK
 
         if (!fs.existsSync(packagePath)) {
@@ -92,23 +105,29 @@ export class PublishSingleton {
             buildCommand += ' --publish-unpublished-deps'
         }
 
+        if (pubFilePath) {
+            buildCommand += ` --pubfile-path ${pubFilePath}`
+        }
+
         buildCommand += inBytes ? ` --serialize-unsigned-transaction --sender ${sender}` : ' --json'
 
         return buildCommand
     }
 
-    static async getPublishBytes(signer?: string, packagePath?: string): Promise<string> {
+    static async getPublishBytes(signer?: string, packagePath?: string, pubFilePath?: string): Promise<string> {
         signer ??= ADMIN_KEYPAIR!.toSuiAddress()
         const _packagePath = this.getPackagePath(packagePath)
-        const cmd = this.getPublishCmd(_packagePath, signer, true)
+        const _pubFilePath = this.getPubFilePath(pubFilePath)
+        const cmd = this.getPublishCmd(_packagePath, signer, _pubFilePath, true)
         return execCmd(cmd)
     }
 
     static async publishPackage(
         signer: Keypair,
-        packagePath: string
+        packagePath: string,
+        pubFilePath: string,
     ): Promise<SuiPublishResponse> {
-        const cmd = this.getPublishCmd(packagePath, signer.toSuiAddress())
+        const cmd = this.getPublishCmd(packagePath, signer.toSuiAddress(), pubFilePath)
         const res = await execCmd(cmd)
         const match = res.match(/\{[\s\S]*\}/)
         if (!match) {

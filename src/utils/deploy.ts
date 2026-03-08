@@ -7,9 +7,10 @@ export async function deploy<
 >(
     ConfigClass: TConfig = Config as TConfig,
     packagePath?: string,
+    pubFilePath?: string,
 ): Promise<string> {
     const vars = ConfigClass.vars as TConfigVars
-    await PublishSingleton.publish(ADMIN_KEYPAIR!, packagePath)
+    await PublishSingleton.publish(ADMIN_KEYPAIR!, packagePath, pubFilePath)
 
     const newConfig = {
         ...vars,
