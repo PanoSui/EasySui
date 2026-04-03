@@ -1,5 +1,11 @@
 # @easysui/sdk
 
+## 1.2.0
+
+### Minor Changes
+
+- Use GRPC instead of JSONRPC
+
 ## 1.1.0
 
 ### Minor Changes
