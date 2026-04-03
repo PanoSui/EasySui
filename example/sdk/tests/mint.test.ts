@@ -1,4 +1,4 @@
-import { describe, it, beforeAll } from 'vitest'
+import { describe, it, beforeAll, expect } from 'vitest'
 
 import { ADMIN_KEYPAIR, createWallet } from '@easysui/sdk'
 import { Drachma } from '../src/tokens/drachma'
@@ -19,5 +19,10 @@ describe('Mint Drachma test', () => {
         await Drachma.send(500_000n, ADMIN_KEYPAIR!, to.toSuiAddress())
         await Drachma.assertBalance(ADMIN_KEYPAIR!, 500_000n)
         await Drachma.assertBalance(to, 500_000n)
+    })
+
+    it('should get drachma coins from a user', async () => {
+        const coinId = await Drachma.getCoin(ADMIN_KEYPAIR!, 100_000n)
+        expect(coinId.startsWith('0x')).toBeTruthy()
     })
 })

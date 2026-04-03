@@ -1,6 +1,6 @@
 import { MoveType, SuiClient } from '../utils/sui_client'
 import { Keypair } from '@mysten/sui/cryptography'
-import {coinWithBalance, Transaction} from '@mysten/sui/transactions'
+import { coinWithBalance, Transaction } from '@mysten/sui/transactions'
 import {COIN_REGISTRY} from "../config/config";
 import { expect } from "vitest";
 
@@ -18,13 +18,26 @@ export class Coin {
         return BigInt(balance?.balance || 0)
     }
 
-    public static async getCoin(owner: Keypair, amount?: bigint) {
-        const balance = amount || (await this.getBalance(owner.toSuiAddress()))
+    public static coinWithBalance(balance: bigint) {
         return coinWithBalance({
             balance,
             useGasCoin: false,
             type: this.coinType,
         })
+    }
+
+    public static async getCoin(owner: Keypair, amount?: bigint): Promise<string> {
+        const balance = amount || (await this.getBalance(owner.toSuiAddress()))
+        const tx = new Transaction()
+        const coinSplit = this.coinWithBalance(balance)
+        tx.transferObjects([coinSplit], owner.toSuiAddress())
+        const result = await SuiClient.signAndExecute(tx, owner)
+
+        const coin = (result.effects as any)?.changedObjects?.find(
+            (o: any) => o.idOperation === 'Created'
+        )
+
+        return (coin as any)?.objectId
     }
 
     public static async _mint(treasuryId: string, amount: bigint, minter: Keypair) {
@@ -56,9 +69,8 @@ export class Coin {
     }
 
     public static async send(amount: bigint, from: Keypair, to: string) {
-        const coin = await this.getCoin(from, amount)
         const ptb = new Transaction()
-        ptb.transferObjects([coin], to)
+        ptb.transferObjects([this.coinWithBalance(amount)], to)
         await SuiClient.signAndExecute(ptb, from)
     }
 

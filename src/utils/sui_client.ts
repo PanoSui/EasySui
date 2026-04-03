@@ -63,6 +63,14 @@ export class SuiClient {
         const result = await SuiClient.client.core.signAndExecuteTransaction({
             transaction: ptb,
             signer,
+            include: {
+                effects: true,
+                events: true,
+                balanceChanges: true,
+                objectTypes: true,
+                transaction: true,
+                bcs: true,
+            }
         })
         const tx: SuiClientTypes.Transaction = result.Transaction ?? result.FailedTransaction
         if (!tx) {

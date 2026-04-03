@@ -2,6 +2,7 @@ import * as fs from 'fs'
 import { Transaction } from '@mysten/sui/transactions'
 import { SuiTransactionBlockResponse } from '@mysten/sui/jsonRpc'
 import { Config } from '../config/config'
+import {SuiClientTypes} from "@mysten/sui/client";
 
 const COST_ANALYSIS_FILE = './gas_cost_estimation.csv'
 const HEADERS = [
@@ -17,7 +18,7 @@ const HEADERS = [
     'gasSpent',
 ]
 
-export function analyze_cost(ptb: Transaction, resp: SuiTransactionBlockResponse) {
+export function analyze_cost(ptb: Transaction, resp: SuiClientTypes.Transaction) {
     if (!process.env.COST_ANALYZER_ENABLED) {
         return
     }
@@ -36,7 +37,7 @@ export function analyze_cost(ptb: Transaction, resp: SuiTransactionBlockResponse
     columns.push(pkg)
     columns.push(`${mod}::${fn}`)
 
-    const gasUsed = resp.effects?.gasUsed
+    const gasUsed = (resp.effects as any)?.gasUsed
     columns.push(gasUsed?.computationCost || 'N/A')
     columns.push(gasUsed?.storageCost || 'N/A')
     columns.push(gasUsed?.storageRebate || 'N/A')
