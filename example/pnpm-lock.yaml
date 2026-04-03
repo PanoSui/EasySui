@@ -11,8 +11,8 @@ importers:
   move:
     dependencies:
       '@mysten/sui':
-        specifier: ^2.6.0
-        version: 2.6.0(typescript@5.9.3)
+        specifier: ^2.14.1
+        version: 2.14.1(typescript@5.9.3)
     devDependencies:
       '@mysten/prettier-plugin-move':
         specifier: ^0.3.1
@@ -27,8 +27,8 @@ importers:
         specifier: link:../..
         version: link:../..
       '@mysten/sui':
-        specifier: ^2.6.0
-        version: 2.6.0(typescript@5.9.3)
+        specifier: ^2.14.1
+        version: 2.14.1(typescript@5.9.3)
       '@types/node':
         specifier: ^25.0.3
         version: 25.3.4
@@ -252,15 +252,15 @@ packages:
   '@jridgewell/sourcemap-codec@1.5.5':
     resolution: {integrity: sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og==}
 
-  '@mysten/bcs@2.0.2':
-    resolution: {integrity: sha512-c/nVRPJEV1fRZdKXhysVsy/yCPdiFt7jn6A4/7W2LH1ZPSVPzRkxtLY362D0zaLuBnyT5Y9d9nFLm3ixI8Goug==}
+  '@mysten/bcs@2.0.3':
+    resolution: {integrity: sha512-dwcaL4HNAsEGpU3hKUAsXgCZp9l6++e2A3THpzoYZ8e7bsy4XH1V0dXD5dIzgNcVZiZfb6ZnDMG+gdF6+1WOQA==}
 
   '@mysten/prettier-plugin-move@0.3.5':
     resolution: {integrity: sha512-PkYZkaH14OAy4S10o4SLl0odGgDHiaILEADiU06gj/MzYZAYq3wh4uCZCO8haX/Xyh2p6NfVy1sihMnUmRnE1g==}
     hasBin: true
 
-  '@mysten/sui@2.6.0':
-    resolution: {integrity: sha512-Dp3z7mDuUCXGgldQ3/AtC1iDiK48XTuAi//fPrHdxEaMl+f5VLjbYtB+mlKNC1SVYLKOUjTeF/RA9qfEBY++pA==}
+  '@mysten/sui@2.14.1':
+    resolution: {integrity: sha512-Thf1gBxHp3g+a2+28aUXD2XuaFZ1zMM92IjvS9ODhMOcV8DKJHs5iVy7yVenbIIke1MD/f4JHDIPKfzv84dlhg==}
     engines: {node: '>=22'}
 
   '@mysten/utils@0.3.1':
@@ -823,7 +823,7 @@ snapshots:
 
   '@jridgewell/sourcemap-codec@1.5.5': {}
 
-  '@mysten/bcs@2.0.2':
+  '@mysten/bcs@2.0.3':
     dependencies:
       '@mysten/utils': 0.3.1
       '@scure/base': 2.0.0
@@ -833,10 +833,10 @@ snapshots:
       prettier: 3.8.1
       web-tree-sitter: 0.20.8
 
-  '@mysten/sui@2.6.0(typescript@5.9.3)':
+  '@mysten/sui@2.14.1(typescript@5.9.3)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.13.1)
-      '@mysten/bcs': 2.0.2
+      '@mysten/bcs': 2.0.3
       '@mysten/utils': 0.3.1
       '@noble/curves': 2.0.1
       '@noble/hashes': 2.0.1

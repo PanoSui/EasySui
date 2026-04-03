@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@easysui/sdk": "link:../..",
-    "@mysten/sui": "^2.6.0",
+    "@mysten/sui": "^2.14.1",
     "@types/node": "^25.0.3",
     "cross-env": "^10.0.0",
     "typescript": "^5.9.2"

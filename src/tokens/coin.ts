@@ -1,6 +1,6 @@
 import { MoveType, SuiClient } from '../utils/sui_client'
 import { Keypair } from '@mysten/sui/cryptography'
-import { coinWithBalance, Transaction } from '@mysten/sui/transactions'
+import {coinWithBalance, Transaction} from '@mysten/sui/transactions'
 import {COIN_REGISTRY} from "../config/config";
 import { expect } from "vitest";
 
@@ -10,29 +10,21 @@ export class Coin {
     }
 
     public static async getBalance(owner: string) {
-        const result = await SuiClient.client.getBalance({
+        const result = await SuiClient.client.core.listBalances({
             owner,
-            coinType: this.coinType,
         })
-        return BigInt(result.totalBalance)
+        // Find the balance for our coin type
+        const balance = result.balances.find((b: any) => b.coinType === this.coinType)
+        return BigInt(balance?.balance || 0)
     }
 
-    public static async getCoin(owner: Keypair, amount?: bigint): Promise<string> {
+    public static async getCoin(owner: Keypair, amount?: bigint) {
         const balance = amount || (await this.getBalance(owner.toSuiAddress()))
-        const tx = new Transaction()
-        const coinSplit = coinWithBalance({
+        return coinWithBalance({
             balance,
             useGasCoin: false,
             type: this.coinType,
         })
-        tx.transferObjects([coinSplit], owner.toSuiAddress())
-        const result = await SuiClient.signAndExecute(tx, owner)
-
-        const coin = result.objectChanges?.find(
-            (o) => o.type === 'created' && o.objectType === `0x2::coin::Coin<${this.coinType}>`
-        )
-
-        return (coin as any)?.objectId
     }
 
     public static async _mint(treasuryId: string, amount: bigint, minter: Keypair) {
@@ -66,7 +58,7 @@ export class Coin {
     public static async send(amount: bigint, from: Keypair, to: string) {
         const coin = await this.getCoin(from, amount)
         const ptb = new Transaction()
-        ptb.transferObjects([ptb.object(coin)], to)
+        ptb.transferObjects([coin], to)
         await SuiClient.signAndExecute(ptb, from)
     }
 

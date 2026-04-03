@@ -1,12 +1,12 @@
-import { SuiJsonRpcClient as SC } from '@mysten/sui/jsonRpc'
+import { SuiGrpcClient as SC } from '@mysten/sui/grpc'
 import { toBase64, fromBase64, fromHex } from '@mysten/sui/utils'
 import { Config } from '../config/config'
-import { Transaction } from '@mysten/sui/transactions'
+import {Transaction} from '@mysten/sui/transactions'
 import { Keypair } from '@mysten/sui/cryptography'
 import { bcs } from '@mysten/sui/bcs'
 import { analyze_cost } from './cost_analyzer'
-import type {SuiTransactionBlockResponse} from "@mysten/sui/jsonRpc";
 import {FORMAT_TYPES, hexToBase64, isHex, toFormatType} from "./byte_utils";
+import {SuiClientTypes} from "@mysten/sui/client";
 
 export enum MoveType {
     u8 = 1,
@@ -25,18 +25,12 @@ export enum MoveType {
     vec_u64,
 }
 
-const txOptions = {
-    showEffects: true,
-    showObjectChanges: true,
-    showBalanceChanges: true,
-}
-
 export class SuiClient {
     private static instance: SuiClient | null = null
     private client: SC
 
     private constructor() {
-        this.client = new SC({ url: Config.vars.RPC, network: Config.vars.NETWORK })
+        this.client = new SC({ baseUrl: Config.vars.RPC, network: Config.vars.NETWORK })
     }
 
     private static getInstance(): SuiClient {
@@ -52,10 +46,10 @@ export class SuiClient {
 
     private static async waitForTransaction(
         ptb: Transaction,
-        resp: SuiTransactionBlockResponse,
+        resp: SuiClientTypes.Transaction,
     ) {
-        await SuiClient.client.waitForTransaction({ digest: resp.digest })
-        if (resp.effects?.status.status !== 'success') {
+        await SuiClient.client.core.waitForTransaction({ digest: resp.digest })
+        if (!resp.status.success) {
             throw new Error(JSON.stringify(resp))
         }
         analyze_cost(ptb, resp)
@@ -66,12 +60,15 @@ export class SuiClient {
         ptb: Transaction,
         signer: Keypair,
     ) {
-        const resp = await SuiClient.client.signAndExecuteTransaction({
+        const result = await SuiClient.client.core.signAndExecuteTransaction({
             transaction: ptb,
             signer,
-            options: txOptions,
         })
-        return SuiClient.waitForTransaction(ptb, resp)
+        const tx: SuiClientTypes.Transaction = result.Transaction ?? result.FailedTransaction
+        if (!tx) {
+            throw new Error('Transaction failed with no response')
+        }
+        return SuiClient.waitForTransaction(ptb, tx)
     }
 
     public static toMoveArg(ptb: Transaction, value: any, type?: MoveType) {
@@ -197,11 +194,14 @@ export class SuiClient {
             gasOwnerSignature = await this.getSignature(gasOwnerSignature, transactionBlock)
             signature.push(gasOwnerSignature)
         }
-        const resp = await SuiClient.client.executeTransactionBlock({
-            transactionBlock: toBase64(transactionBlock),
-            signature,
-            options: txOptions
+        const result = await SuiClient.client.core.executeTransaction({
+            transaction: transactionBlock,
+            signatures: signature,
         })
+        const resp = result.Transaction ?? result.FailedTransaction
+        if (!resp) {
+            throw new Error('Transaction execution failed with no response')
+        }
         const ptb = Transaction.from(toBase64(transactionBlock))
         return SuiClient.waitForTransaction(ptb, resp)
     }
@@ -235,15 +235,24 @@ export class SuiClient {
     }
 
     public static async devInspect(ptb: Transaction, sender: string) {
-        return await SuiClient.client.devInspectTransactionBlock({
-            transactionBlock: ptb,
-            sender,
+        // Note: In v2, simulateTransaction requires the sender to be set on the transaction
+        // Make sure the transaction has sender set before calling this
+        ptb.setSender(sender)
+        return await SuiClient.client.core.simulateTransaction({
+            transaction: ptb,
+            checksEnabled: false,
+            include: { commandResults: true },
         })
     }
 
     public static async devInspectRaw(ptb: Transaction, sender: string) {
         const result = await this.devInspect(ptb, sender)
-        return result.results?.[0].returnValues?.[0]?.[0]
+        const commandResult = result.commandResults?.[0]
+        if (!commandResult || !commandResult.returnValues?.[0]) {
+            return undefined
+        }
+        // In v2, returnValues structure changed - it's now a CommandOutput object
+        return commandResult.returnValues[0] as any as Uint8Array
     }
 
     public static async devInspectBool(ptb: Transaction, sender: string) {
@@ -274,24 +283,25 @@ export class SuiClient {
     }
 
     public static async getObject(id: string) {
-        return SuiClient.client.getObject({
-            id,
-            options: {
-                showContent: true,
-                showType: true,
-                showDisplay: true,
-                showBcs: true,
+        return SuiClient.client.core.getObject({
+            objectId: id,
+            include: {
+                content: true,
+                type: true,
+                display: true,
+                bcs: true,
             },
         })
     }
 
     public static async getObjectsByType(owner: string, type: string) {
-        const res = await SuiClient.client.getOwnedObjects({
+        const res = await SuiClient.client.core.listOwnedObjects({
             owner,
-            filter: {
-                StructType: type,
+            type,
+            include: {
+                content: true,
             },
         })
-        return res.data.map((o) => o.data?.objectId).filter((o) => o)
+        return res.objects.map((o) => o.objectId).filter((o) => o)
     }
 }

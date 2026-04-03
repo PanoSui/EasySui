@@ -31,13 +31,16 @@ export function sleep(ms: number): Promise<void> {
 }
 
 export async function waitForNextEpoch(timeoutMs = 5 * 60 * 1000, pollIntervalMs = 2000) {
-    const startEpoch = (await SuiClient.client.getLatestSuiSystemState()).epoch
+    // Note: In v2, use getCurrentEpoch to track epoch changes
+    const startEpochData = await SuiClient.client.core.getCurrentSystemState()
+    const startEpoch = BigInt(startEpochData.systemState.epoch)
     const startTime = Date.now()
 
     while (true) {
-        const { epoch } = await SuiClient.client.getLatestSuiSystemState()
-        if (Number(epoch) > Number(startEpoch)) {
-            return epoch
+        const currentEpochData = await SuiClient.client.core.getCurrentSystemState()
+        const currentEpoch = BigInt(currentEpochData.systemState.epoch)
+        if (currentEpoch > startEpoch) {
+            return currentEpoch.toString()
         }
 
         if (Date.now() - startTime > timeoutMs) {
