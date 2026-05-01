@@ -18,15 +18,15 @@
     "clean": "rm -rf ./node_modules"
   },
   "devDependencies": {
-    "prettier": "^3.6.2",
+    "prettier": "^3.8.3",
     "tsx": "^4.21.0",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.5"
   },
   "dependencies": {
     "@easysui/sdk": "link:../..",
-    "@mysten/sui": "^2.14.1",
-    "@types/node": "^25.0.3",
-    "cross-env": "^10.0.0",
-    "typescript": "^5.9.2"
+    "@mysten/sui": "^2.16.0",
+    "@types/node": "^25.6.0",
+    "cross-env": "^10.1.0",
+    "typescript": "^5.9.3"
   }
 }

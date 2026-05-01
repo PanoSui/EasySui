@@ -4,63 +4,51 @@ export type Digest = string;
 export type Base58String = string;
 
 export interface SuiPublishResponse {
-    transaction: {
-        V1: TransactionV1;
-    };
-    effects: {
-        V2: EffectsV2;
-    };
-    clever_error: string | null;
-    events: unknown | null;
-    changed_objects: ChangedObjectFlat[];
-    unchanged_loaded_runtime_objects: unknown[];
-    balance_changes: BalanceChange[];
-    checkpoint: number;
+    digest: Digest;
+    transaction: SuiTransaction;
+    effects: TransactionEffects;
+    objectChanges: ObjectChange[];
+    balanceChanges: BalanceChange[];
+    timestampMs: string;
+    checkpoint: string;
 }
 
 /** ---------------- Transaction ---------------- */
 
-export interface TransactionV1 {
-    kind: {
-        ProgrammableTransaction: ProgrammableTransaction;
-    };
-    sender: HexAddress;
-    gas_data: GasData;
-    expiration: "None" | { Epoch: number } | { EpochId: number } | unknown;
+export interface SuiTransaction {
+    data: TransactionData;
+    txSignatures: string[];
 }
 
-export interface ProgrammableTransaction {
+export interface TransactionData {
+    messageVersion: "v1" | string;
+    transaction: ProgrammableTransactionBlock;
+    sender: HexAddress;
+    gasData: GasData;
+}
+
+export interface ProgrammableTransactionBlock {
+    kind: "ProgrammableTransaction" | string;
     inputs: PTInput[];
-    commands: PTCommand[];
+    transactions: PTCommand[];
 }
 
 export type PTInput =
-    | { Pure: number[] } // bytes
-    | { Object: PTObjectArg }
+    | { type: "pure"; valueType: string; value: unknown }
+    | {
+          type: "object";
+          objectType: string;
+          objectId: ObjectId;
+          version?: string | number;
+          digest?: Digest;
+          mutable?: boolean;
+          initialSharedVersion?: string | number;
+      }
     | Record<string, unknown>;
-
-export type PTObjectArg =
-    | { ImmOrOwnedObject: ObjectRef }
-    | { SharedObject: SharedObjectRef }
-    | { Receiving: ObjectRef }
-    | Record<string, unknown>;
-
-export interface ObjectRef {
-    objectId: ObjectId;
-    version: string | number;
-    digest: Digest;
-}
-
-export interface SharedObjectRef {
-    objectId: ObjectId;
-    initialSharedVersion: string | number;
-    mutable: boolean;
-}
 
 export type PTCommand =
-    | { Publish: [number[][], HexAddress[]] } // [modules-bytes[], dep-ids[]]
+    | { Publish: HexAddress[] }
     | { TransferObjects: [PTArgument[], PTArgument] }
-    // Add more command variants here as you need them:
     | { MoveCall: unknown }
     | { SplitCoins: unknown }
     | { MergeCoins: unknown }
@@ -72,37 +60,70 @@ export type PTArgument =
     | { Input: number }
     | { Result: number }
     | { NestedResult: [number, number] }
-    | { GasCoin: true }
+    | "GasCoin"
     | Record<string, unknown>;
 
 export interface GasData {
-    payment: [ObjectId, number, Digest][];
+    payment: GasPayment[];
     owner: HexAddress;
-    price: number;
-    budget: number;
+    price: string;
+    budget: string;
+}
+
+export interface GasPayment {
+    objectId: ObjectId;
+    version: number | string;
+    digest: Digest;
 }
 
 /** ---------------- Effects ---------------- */
 
-export interface EffectsV2 {
-    status: "Success" | { Failure: unknown } | string;
-    executed_epoch: number;
-
-    gas_used: GasUsed;
-
-    transaction_digest: Digest;
-    gas_object_index: number;
-
-    events_digest: Digest | null;
-    dependencies: Digest[];
-
-    lamport_version: number;
-
-    changed_objects: ChangedObjectTuple[];
-    unchanged_consensus_objects: unknown[];
-
-    aux_data_digest: Digest | null;
+export interface TransactionEffects {
+    messageVersion: "v1" | string;
+    status: ExecutionStatus;
+    executedEpoch: string;
+    gasUsed: GasUsed;
+    modifiedAtVersions?: ModifiedAtVersion[];
+    transactionDigest: Digest;
+    created?: OwnedObjectRef[];
+    mutated?: OwnedObjectRef[];
+    unwrapped?: OwnedObjectRef[];
+    deleted?: ObjectRef[];
+    wrapped?: ObjectRef[];
+    unwrappedThenDeleted?: ObjectRef[];
+    gasObject: OwnedObjectRef;
+    eventsDigest?: Digest;
+    dependencies?: Digest[];
+    sharedObjects?: ObjectRef[];
 }
+
+export interface ExecutionStatus {
+    status: "success" | "failure" | string;
+    error?: string;
+}
+
+export interface ModifiedAtVersion {
+    objectId: ObjectId;
+    sequenceNumber: string;
+}
+
+export interface OwnedObjectRef {
+    owner: Owner;
+    reference: ObjectRef;
+}
+
+export interface ObjectRef {
+    objectId: ObjectId;
+    version: number | string;
+    digest: Digest;
+}
+
+export type Owner =
+    | { AddressOwner: HexAddress }
+    | { ObjectOwner: ObjectId }
+    | { Shared: { initial_shared_version: number | string } }
+    | "Immutable"
+    | Record<string, unknown>;
 
 export interface GasUsed {
     computationCost: string;
@@ -111,64 +132,75 @@ export interface GasUsed {
     nonRefundableStorageFee: string;
 }
 
-export type ChangedObjectTuple = [
-    ObjectId,
-    {
-        input_state: "NotExist" | { Exist: [ [number, Digest], OwnerV2 ] } | unknown;
-        output_state:
-            | { ObjectWrite: [Digest, OwnerV2] }
-            | { PackageWrite: [number, Digest] }
-            | unknown;
-        id_operation: "Created" | "None" | "Deleted" | string;
-    }
-];
+/** ---------------- Object changes ---------------- */
 
-export type OwnerV2 =
-    | { AddressOwner: HexAddress }
-    | { ObjectOwner: ObjectId }
-    | { Shared: { initial_shared_version: number | string } }
-    | { Immutable: true }
-    | Record<string, unknown>;
+export type ObjectChange =
+    | ObjectChangePublished
+    | ObjectChangeCreated
+    | ObjectChangeMutated
+    | ObjectChangeTransferred
+    | ObjectChangeDeleted
+    | ObjectChangeWrapped;
 
-/** ---------------- Flattened changed_objects (your second list) ---------------- */
-
-export interface ChangedObjectFlat {
-    objectId: ObjectId;
-
-    inputState:
-        | "INPUT_OBJECT_STATE_DOES_NOT_EXIST"
-        | "INPUT_OBJECT_STATE_EXISTS"
-        | string;
-
-    outputState:
-        | "OUTPUT_OBJECT_STATE_OBJECT_WRITE"
-        | "OUTPUT_OBJECT_STATE_PACKAGE_WRITE"
-        | string;
-
-    inputVersion?: string;
-    inputDigest?: Digest;
-    inputOwner?: OwnerFlat;
-
-    outputVersion?: string;
-    outputDigest?: Digest;
-    outputOwner?: OwnerFlat;
-
-    idOperation: "CREATED" | "NONE" | "DELETED" | string;
-
-    objectType: string; // e.g. "package" or full type string
+export interface ObjectChangePublished {
+    type: "published";
+    packageId: HexAddress;
+    version: string;
+    digest: Digest;
+    modules: string[];
 }
 
-export type OwnerFlat =
-    | { kind: "ADDRESS"; address: HexAddress }
-    | { kind: "OBJECT"; objectId: ObjectId }
-    | { kind: "SHARED"; initialSharedVersion?: string | number }
-    | { kind: "IMMUTABLE" }
-    | Record<string, unknown>;
+export interface ObjectChangeCreated {
+    type: "created";
+    sender: HexAddress;
+    owner: Owner;
+    objectType: string;
+    objectId: ObjectId;
+    version: string;
+    digest: Digest;
+}
+
+export interface ObjectChangeMutated {
+    type: "mutated";
+    sender: HexAddress;
+    owner: Owner;
+    objectType: string;
+    objectId: ObjectId;
+    version: string;
+    previousVersion: string;
+    digest: Digest;
+}
+
+export interface ObjectChangeTransferred {
+    type: "transferred";
+    sender: HexAddress;
+    recipient: Owner;
+    objectType: string;
+    objectId: ObjectId;
+    version: string;
+    digest: Digest;
+}
+
+export interface ObjectChangeDeleted {
+    type: "deleted";
+    sender: HexAddress;
+    objectType: string;
+    objectId: ObjectId;
+    version: string;
+}
+
+export interface ObjectChangeWrapped {
+    type: "wrapped";
+    sender: HexAddress;
+    objectType: string;
+    objectId: ObjectId;
+    version: string;
+}
 
 /** ---------------- Balance changes ---------------- */
 
 export interface BalanceChange {
-    address: HexAddress;
-    coin_type: string;
-    amount: number;
+    owner: Owner;
+    coinType: string;
+    amount: string;
 }

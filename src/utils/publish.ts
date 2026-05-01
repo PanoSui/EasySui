@@ -2,7 +2,7 @@ import fs from 'fs'
 import { Keypair } from '@mysten/sui/cryptography'
 import { ADMIN_KEYPAIR, Config } from '../config/config'
 import { normalizeStructTag } from '@mysten/sui/utils'
-import {ChangedObjectFlat, SuiPublishResponse} from "../types/grpc";
+import {ObjectChangeCreated, ObjectChangePublished, SuiPublishResponse} from "../types/grpc";
 import {execCmd} from "./exec";
 
 export class PublishSingleton {
@@ -23,14 +23,7 @@ export class PublishSingleton {
     }
 
     private static getPubFilePath(pubFilePath?: string): string {
-        pubFilePath ??= Config.vars.PUBFILE_PATH
-
-        if (!pubFilePath) {
-            throw new Error(
-                `You must set the \`PUBFILE_PATH\` environment variable to your Pub.${Config.vars.NETWORK}.toml path.`
-            )
-        }
-
+        pubFilePath ??= Config.vars.PUBFILE_PATH || `Pub.${Config.vars.NETWORK}.toml`
         return pubFilePath
     }
 
@@ -62,7 +55,7 @@ export class PublishSingleton {
         if (!packageChng) {
             throw new Error('Expected to find package published')
         }
-        return packageChng.objectId
+        return packageChng.packageId
     }
 
     public static findObjectIdByType(type: string, fail: boolean = true): string {
@@ -105,7 +98,7 @@ export class PublishSingleton {
             buildCommand += ' --publish-unpublished-deps'
         }
 
-        if (pubFilePath) {
+        if (isEphemeralChain && pubFilePath) {
             buildCommand += ` --pubfile-path ${pubFilePath}`
         }
 
@@ -138,19 +131,19 @@ export class PublishSingleton {
 
     static findPublishedPackage(
         resp: SuiPublishResponse
-    ): ChangedObjectFlat | undefined {
-        return resp.changed_objects?.find((c) => c.objectType === 'package')
+    ): ObjectChangePublished | undefined {
+        return resp.objectChanges?.find((c) => c.type === 'published')
     }
 
     static findObjectChangeCreatedByType(
         resp: SuiPublishResponse,
         type: string
-    ): ChangedObjectFlat | undefined {
+    ): ObjectChangeCreated | undefined {
         const normalizedType = normalizeStructTag(type)
-        return resp.changed_objects?.find(
-            (c) => c.idOperation === 'CREATED'
+        return resp.objectChanges?.find(
+            (c) => c.type === 'created'
                 && (c.objectType === type || c.objectType === normalizedType)
-        )
+        ) as ObjectChangeCreated
     }
 
     static get pubFile() {
