@@ -29,7 +29,7 @@
     "changeset": "changeset",
     "bump": "pnpm changeset version",
     "version": "pnpm changeset version",
-    "release": "pnpm build && changeset publish --access public"
+    "release": "pnpm build && changeset publish"
   },
   "keywords": [
     "sui",
