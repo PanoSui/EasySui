@@ -1,5 +1,11 @@
 # @easysui/sdk
 
+## 1.2.1
+
+### Patch Changes
+
+- Support the newer version of publish response
+
 ## 1.2.0
 
 ### Minor Changes
